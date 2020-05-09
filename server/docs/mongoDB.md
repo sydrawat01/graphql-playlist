@@ -57,6 +57,7 @@ It is recommended to run MongoDB as a macOS service, as doing so sets the correc
   `brew services stop mongodb-community`
 
 - To verify that MongoDB is running, search for **mongod** in your running processes:
+
   `ps aux | grep -v grep | grep mongod`
 
   > You can also view the log file to see the current status of your mongod process: /usr/local/var/log/mongodb/mongo.log.
@@ -64,6 +65,7 @@ It is recommended to run MongoDB as a macOS service, as doing so sets the correc
 ## Connect and Use MongoDB
 
 To begin using MongoDB, connect a mongo shell to the running instance. From a new terminal, issue the following:
+
 `mongo`
 
 For any doubts regarding the installation, visit the [mongo website](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/).

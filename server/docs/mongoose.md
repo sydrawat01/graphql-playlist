@@ -37,7 +37,7 @@ They have paid plans as well, but we'll be using the free resources for this dem
 
    ![alt text](../assets/string.png 'connection string')
 
-   Replace the _\<passowrd\>_ with the password provided in Step 4.
+   Replace the _\<password>_ with the password provided in Step 4.
 
 ## Setting up the server
 
