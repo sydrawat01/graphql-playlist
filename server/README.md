@@ -162,7 +162,7 @@ We can run the following query on the left-most panel of the window to get the q
 
 > NOTE: Always use double quotes, single-qoutes do not work in graphiql
 
-```json
+```
 {
   book(id:"420"){
     name,
@@ -197,7 +197,7 @@ So, if we remove the `genre` from the query, the result will not show the `genre
 
 In our present schema, we are using a string to represent the book `id`. However, if in our query, we pass a number in the book id as such (without the double quotes):
 
-```json
+```
 {
   book(id:420){
     name,
@@ -295,7 +295,7 @@ Now, we can see the `RootQueryType` has two objects that we can use to query the
 
 #### Query: Author
 
-```json
+```
 {
   author(id: 3) {
     name,
