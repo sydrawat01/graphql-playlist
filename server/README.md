@@ -321,9 +321,7 @@ We get the following result:
 
 ## Type Relations
 
-Why are the `fields()` in the object types `BookType` and `AuthorType` a function? Let's see why:
-
-Every book has na author, and every author has a collection of books. So, we need to translate this idea into our graphql schema.
+Every book has an author, and every author has a collection of books. So, we need to translate this idea into our graphql schema.
 
 When a user queries a book from the front-end and wants to know the author of the book, we can send that data as well.
 
@@ -333,7 +331,7 @@ We'll add `authorID` to the `books` array to correspond to whichever ID of that 
 
 Suppose we have the following query where we want to get a `book` with `id:2` and also the `name` of the `author`:
 
-```json
+```
 {
   book(id: 2){
     name,
@@ -401,3 +399,96 @@ Now when we run the query to fetch a book with the (nested) author name, we see 
 ```
 
 ![alt text](assets/type-relation.png 'Type Relations')
+
+## GraphQL Lists
+
+What if we want to query all the books written by an author? A query something like this:
+
+```
+author(id: 3) {
+  name,
+  age,
+  books {
+    name,
+    genre
+  }
+}
+```
+
+In the above nested query, the `books` query will have a `LIST` of books, and not one `BookType`.
+For this, we need to grab another type from `graphql` called `GraphQLList`.
+
+```js
+const { ___, ___, GraphQLList } = graphql;
+```
+
+The `GraphQLList()` will have objects of type `BookType` in the list. So:
+
+```js
+books: {
+  type: GraphQLList(BookType);
+}
+```
+
+Now in the `AuthorType` object, we need to define a `books` query where we `filter` out the books written by that particular author.
+
+```js
+const AuthorType = new GraphQLObjectType({
+  name: 'Author',
+  fields: () => ({
+    id: { type: GraphQLID },
+    name: { type: GraphQLString },
+    age: { type: GraphQLInt },
+    books: {
+      type: new GraphQLList(BookType),
+      resolve(parent, args) {
+        // console.log(parent);
+        return _.filter(books, { authorID: parent.id });
+      },
+    },
+  }),
+});
+```
+
+Added a few more books to the `books` array:
+
+```js
+var books = [
+  { name: 'books of the wild', genre: 'Fantasy', id: '123', authorID: '1' },
+  { name: 'books of the city', genre: 'Fact', id: '420', authorID: '2' },
+  { name: 'books of the galaxy', genre: 'Sci-Fi', id: '69', authorID: '2' },
+  { name: 'piano for beginners', genre: 'Self-Development', id: '9', authorID: '3' },
+  { name: 'javascript for dummies', geenre: 'Technology', id: '32', authorID: '3' },
+];
+```
+
+Running the query, we get the results:
+
+![alt text](assets/graphqllist.png 'GraphQL Lists')
+
+Why are the `fields:()=>{}` in the object types `BookType` and `AuthorType` a function? Let's see why:
+
+The code defined for `BookType` and `AuthorType` is compiled from top to bottom. So if we remove the `fields:()=>{}` function:
+
+```js
+const BookType = new ___({
+  ___,
+  fields: {
+    //here we usetype: AuthorType
+  },
+});
+
+const AuthorType = new ___({
+  ___,
+  fields: {
+    //here we use type: BookType
+  },
+});
+```
+
+In the above code skeleton, we can see `AuthorType` will function correctly without the `fields:()=>{}` function, since `BookType` is already defined above. But the problem arises when we're accessing `AuthorType` in `BookType` before `AuthorType` is even defined.
+
+If you're wondering what if we interchange their places, well , it's gong to change the error from pointing it from `AuthorType` to `BookType`.
+What essentially is hapenning is that the `fields:{}` is being executed as soon as it gets compiled from top to bottom. Hence these errors are thrown. To avoid running the `fields{}` at the time of compilation, we use `fields:()=>{}` function so that it can be run at a later time, and not at compile time.
+
+This is why we wrap these fields inside a function.
