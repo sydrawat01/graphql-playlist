@@ -1,0 +1,46 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Express server for graphQL tutorial",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "./node_modules/.bin/nodemon app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sydrawat/graphql-playlist.git"
+  },
+  "keywords": [
+    "express",
+    "node",
+    "graphql"
+  ],
+  "author": "Siddharth Rawat",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sydrawat/graphql-playlist/issues"
+  },
+  "homepage": "https://github.com/sydrawat/graphql-playlist#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-graphql": "^0.9.0",
+    "graphql": "^15.0.0",
+    "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb": "^18.1.0",
+    "eslint-config-node": "^4.0.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.3",
+    "eslint-plugin-react": "^7.19.0",
+    "eslint-plugin-react-hooks": "^2.5.0",
+    "nodemon": "^2.0.3",
+    "prettier": "^2.0.5"
+  }
+}
