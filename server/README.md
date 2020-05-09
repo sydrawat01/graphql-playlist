@@ -162,11 +162,11 @@ We can run the following query on the left-most panel of the window to get the q
 
 > NOTE: Always use double quotes, single-qoutes do not work in graphiql
 
-```
+```graphql
 {
-  book(id:"420"){
-    name,
-    genre,
+  book(id: "420") {
+    name
+    genre
     id
   }
 }
@@ -197,11 +197,11 @@ So, if we remove the `genre` from the query, the result will not show the `genre
 
 In our present schema, we are using a string to represent the book `id`. However, if in our query, we pass a number in the book id as such (without the double quotes):
 
-```
+```graphql
 {
-  book(id:420){
-    name,
-    genre,
+  book(id: 420) {
+    name
+    genre
     id
   }
 }
@@ -295,11 +295,11 @@ Now, we can see the `RootQueryType` has two objects that we can use to query the
 
 #### Query: Author
 
-```
+```graphql
 {
   author(id: 3) {
-    name,
-    age,
+    name
+    age
     id
   }
 }
@@ -331,11 +331,11 @@ We'll add `authorID` to the `books` array to correspond to whichever ID of that 
 
 Suppose we have the following query where we want to get a `book` with `id:2` and also the `name` of the `author`:
 
-```
+```graphql
 {
-  book(id: 2){
-    name,
-    genre,
+  book(id: 2) {
+    name
+    genre
     authorID {
       name
     }
@@ -404,7 +404,7 @@ Now when we run the query to fetch a book with the (nested) author name, we see 
 
 What if we want to query all the books written by an author? A query something like this:
 
-```
+```graphql
 author(id: 3) {
   name,
   age,
@@ -492,3 +492,191 @@ If you're wondering what if we interchange their places, well , it's gong to cha
 What essentially is hapenning is that the `fields:{}` is being executed as soon as it gets compiled from top to bottom. Hence these errors are thrown. To avoid running the `fields{}` at the time of compilation, we use `fields:()=>{}` function so that it can be run at a later time, and not at compile time.
 
 This is why we wrap these fields inside a function.
+
+## More on RootQuery
+
+Now, after this initial setup, we can define our root queries on _all books_ and _all authors_ as well. This is pretty straight forward now, and GraphQL does all the heavy lifting for us from now.
+
+Have a look here:
+
+```js
+const RootQuery = new GraphQLObjectType({
+  name: 'RootQueryType',
+  fields: {
+    book: {
+      type: BookType,
+      args: { id: { type: GraphQLID } },
+      resolve(parent, args) {
+        return _.find(books, { id: args.id });
+      },
+    },
+    author: {
+      type: AuthorType,
+      args: { id: { type: GraphQLID } },
+      resolve(parent, args) {
+        return_.find(authors, { id: args.id });
+      },
+    },
+    books: {
+      type: new GraphQLList(BookType),
+      resolve(parent, args) {
+        return books;
+      },
+    },
+    authors: {
+      type: new GraphQLList(AuthorType),
+      resolve(parent, args) {
+        return authors;
+      },
+    },
+  },
+});
+```
+
+After adding the `authors` and `books` fields in our root query, we can query all the books and all the authors now.
+
+#### Querying all the books nested with author details for each book
+
+##### QUERY
+
+```graphql
+{
+  books {
+    name
+    id
+    genre
+    authorID {
+      name
+      age
+    }
+  }
+}
+```
+
+![alt text](assets/books.png 'books query with nested author details')
+
+###### RESULT
+
+```json
+{
+  "data": {
+    "books": [
+      {
+        "name": "books of the wild",
+        "id": "123",
+        "genre": "Fantasy",
+        "authorID": {
+          "name": "Patrick Rothfuss",
+          "age": 44
+        }
+      },
+      {
+        "name": "books of the city",
+        "id": "420",
+        "genre": "Fact",
+        "authorID": {
+          "name": "Brandon Sanderson",
+          "age": 42
+        }
+      },
+      {
+        "name": "books of the galaxy",
+        "id": "69",
+        "genre": "Sci-Fi",
+        "authorID": {
+          "name": "Brandon Sanderson",
+          "age": 42
+        }
+      },
+      {
+        "name": "piano for beginners",
+        "id": "9",
+        "genre": "Self-Development",
+        "authorID": {
+          "name": "Terry Pratchett",
+          "age": 66
+        }
+      },
+      {
+        "name": "javascript for dummies",
+        "id": "32",
+        "genre": null,
+        "authorID": {
+          "name": "Terry Pratchett",
+          "age": 66
+        }
+      }
+    ]
+  }
+}
+```
+
+#### Querying all the authors nested with book details for each author
+
+We can also query for all the authors and all the books written by them in a nested fashion.
+
+##### QUERY
+
+```graphql
+{
+  authors {
+    name
+    age
+    books {
+      name
+      id
+    }
+  }
+}
+```
+
+![alt text](assets/authors.png 'authors query with nested books details')
+
+##### RESULT
+
+```json
+{
+  "data": {
+    "authors": [
+      {
+        "name": "Patrick Rothfuss",
+        "age": 44,
+        "books": [
+          {
+            "name": "books of the wild",
+            "id": "123"
+          }
+        ]
+      },
+      {
+        "name": "Brandon Sanderson",
+        "age": 42,
+        "books": [
+          {
+            "name": "books of the city",
+            "id": "420"
+          },
+          {
+            "name": "books of the galaxy",
+            "id": "69"
+          }
+        ]
+      },
+      {
+        "name": "Terry Pratchett",
+        "age": 66,
+        "books": [
+          {
+            "name": "piano for beginners",
+            "id": "9"
+          },
+          {
+            "name": "javascript for dummies",
+            "id": "32"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
