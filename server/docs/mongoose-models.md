@@ -25,7 +25,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const bookSchema = new Schema({
-  title: String,
+  name: String,
   genre: String,
   authorID: String,
 });
@@ -116,3 +116,63 @@ So now when we run our server and request the query from graphql, we get the des
 ```
 
 ![alt text](../assets/mutation-res.png 'query returning the object properly')
+
+I've added 3 different authors on my db:
+
+![alt text](../assets/authors-clouddb.png 'authors collection with records')
+
+Let's do the same for books:
+
+```js
+const Mutation = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: {
+    // addAuthor
+
+    addBook: {
+      type: BookType,
+      args: {
+        name: { type: GraphQLString },
+        genre: { type: GraphQLString },
+        authorID: { type: GraphQLID },
+      },
+      resolve(parent, args) {
+        let book = new Book({
+          name: args.name,
+          genre: args.genre,
+          authorID: args.authorID,
+        });
+        return book.save();
+      },
+    },
+  },
+});
+```
+
+On the Graphiql tool, run the following query:
+
+```graphql
+mutation {
+  addBook(name: "The Long Earth", genre: "Sci-Fi", authorID: "5eba7f6e9d1ddb1356b79ac0") {
+    name
+    genre
+  }
+}
+```
+
+This will result:
+
+```json
+{
+  "data": {
+    "addBook": {
+      "name": "The Long Earth",
+      "genre": "Sci-Fi"
+    }
+  }
+}
+```
+
+To check if the mutation to add books has been done to the `books` collection, we can check it on the [mongo cloud](https://cloud.mongodb.com).
+
+![alt text](../assets/books-collection.png 'books collection updated with nutation')
