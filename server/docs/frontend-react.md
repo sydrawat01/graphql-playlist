@@ -28,3 +28,5 @@ We need to host our server on port `4000` continuously and our front-end on port
 
 - Server: Go to `server/` and run `npm run dev`
 - Client: Go to `client/` and run `npm start`
+
+> NOTE: Apollo Client Developer Tools is not available on FireFox. Currently it has support only for Chrome. For more details, check [this issue](https://github.com/apollographql/apollo-client-devtools/issues/73).
