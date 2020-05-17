@@ -1,37 +1,49 @@
-import React from 'react';
-import { gql } from 'apollo-boost';
+import React, { useState } from 'react';
 import { useQuery } from '@apollo/react-hooks';
-
-const GET_AUTHORS = gql`
-  {
-    authors {
-      name
-      id
-    }
-  }
-`;
+import { GET_AUTHORS } from '../queries/queries';
 
 function AddBook() {
+  const [formData, setFormData] = useState({
+    bookName: '',
+    genre: '',
+    authorID: '',
+  });
   const { loading, error, data } = useQuery(GET_AUTHORS);
-  if (loading) return <div disabled>Loading Authors...</div>;
+  if (loading) return <div>Loading Authors...</div>;
   if (error) return <div>Error!</div>;
+
+  const handleEvent = (e) => {
+    e.persist();
+    setFormData((formData) => ({
+      ...formData,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const submitForm = (e) => {
+    e.preventDefault();
+    console.log(formData);
+  };
 
   return (
     <div>
-      <form id="add-book">
+      <form id="add-book" onSubmit={submitForm}>
         <div className="field">
-          <label>Book Name:</label>
-          <input type="text" />
+          <label htmlFor="bookName">Book Name:</label>
+          <input name="bookName" type="text" onChange={handleEvent} />
         </div>
         <div className="field">
-          <label>Genre:</label>
-          <input type="text" />
+          <label htmlFor="genre">Genre:</label>
+          <input name="genre" type="text" onChange={handleEvent} />
         </div>
         <div className="field">
-          <label>Author:</label>
-          <select>
+          <label htmlFor="authorID">Author:</label>
+          <select name="authorID" onChange={handleEvent}>
+            <option value="">--Select Author--</option>
             {data.authors.map((author) => (
-              <option key={author.id}>{author.name}</option>
+              <option key={author.id} value={author.id}>
+                {author.name}
+              </option>
             ))}
           </select>
         </div>

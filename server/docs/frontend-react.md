@@ -195,10 +195,24 @@ function BookList() {
 
 This is similar to the `BookList` component.
 
+But before adding the `AddBook` component, we'll move all our queries in another folder and into a new file.
+
+- Create `queries/` inside `src/`.
+- Create `queries.js`
+
+In `queries.js`:
+
 ```js
-import React from 'react';
-import { gql } from 'apollo-boost ';
-import { useQuery } from '@apollo/react-hooks';
+import { gql } from 'apollo-boost';
+
+const GET_BOOKS = gql`
+  {
+    books {
+      name
+      id
+    }
+  }
+`;
 
 const GET_AUTHORS = gql`
   {
@@ -209,27 +223,104 @@ const GET_AUTHORS = gql`
   }
 `;
 
+export { GET_AUTHORS, GET_BOOKS };
+```
+
+> NOTE: After doing so, please update the imports in `BookList.js`.
+
+Now, for the `AddBook` component:
+
+```js
+import React from 'react';
+import { useQuery } from '@apollo/react-hooks';
+import { GET_AUTHORS } from '../queries/queries';
+
 function AddBook() {
   const { loading, error, data } = useQuery(GET_AUTHORS);
   if (loading) return <div>Loading Authors...</div>;
-  if (error) return <div>Error</div>;
+  if (error) return <div>Error!</div>;
 
   return (
     <div>
       <form id="add-book">
         <div className="field">
-          <label>Book Name:</label>
-          <input type="text" />
+          <label htmlFor="bookName">Book Name:</label>
+          <input name="bookName" type="text" />
         </div>
         <div className="field">
-          <label>Genre:</label>
-          <input type="text" />
+          <label htmlFor="genre">Genre:</label>
+          <input name="genre" type="text" />
         </div>
         <div className="field">
-          <label>Author:</label>
-          <select>
+          <label htmlFor="authorID">Author:</label>
+          <select name="authorID">
+            <option value="">--Select Author--</option>
+          </select>
+        </div>
+        <button>+</button>
+      </form>
+    </div>
+  );
+}
+
+export default AddBook;
+```
+
+After adding 2 components to our `<App />` component, this is what our app looks like:
+
+![alt text](../assets/components.png 'App after 2 components')
+
+## Updating component state
+
+We'll use [React Hooks](https://reactjs.org/docs/hooks-intro.html) in functional components.
+
+```js
+import React, { useState } from 'react';
+
+function AddBook() {
+  //previous code
+
+  //declare the state and setState() functions
+  const [formData, setFormData] = useState({
+    bookName: '',
+    genre: '',
+    authorID: '',
+  });
+
+  //event handler for form data
+  const handleEvent = e => {
+    e.persist();
+    setFormData(formData => ({
+      ...formData,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  //on submit of form
+  const submitForm = e => {
+    e.preventDefault();
+    console.log(formData);
+  };
+
+  return (
+    <div>
+      <form id="add-book" onSubmit={submitForm}>
+        <div className="field">
+          <label htmlFor="bookName">Book Name:</label>
+          <input name="bookName" type="text" onChange={handleEvent} />
+        </div>
+        <div className="field">
+          <label htmlFor="genre">Genre:</label>
+          <input name="genre" type="text" onChange={handleEvent} />
+        </div>
+        <div className="field">
+          <label htmlFor="authorID">Author:</label>
+          <select name="authorID" onChange={handleEvent}>
+            <option value="">--Select Author--</option>
             {data.authors.map(author => (
-              <option key={author.id}>{author.name}</option>
+              <option key={author.id} value={author.id}>
+                {author.name}
+              </option>
             ))}
           </select>
         </div>
@@ -242,6 +333,10 @@ function AddBook() {
 export default AddBook;
 ```
 
-After adding 2 components, this is what our app looks like:
+> NOTE: We use `event.persist()` in updating our state since the `setState` function here returns a function, which will update the states in a synchronous way, but we are accessing the data from the eventListner on the elements of the form in an **asynchronous way**. To access these properties in an asynchronous way rather than in a synchronous way that `setState` does, we need to use `e.persist()` here. [reference](https://reactjs.org/docs/events.html)
 
-![alt text](../assets/components.png 'App after 2 components')
+Finally, we should be able to see the resultant object on our console:
+
+```json
+{ "bookName": "The Road to Levinshire", "genre": "Sci-Fi", "authorID": "5eba7f419d1ddb1356b79abe" }
+```
