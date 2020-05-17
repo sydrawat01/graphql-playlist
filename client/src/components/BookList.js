@@ -14,7 +14,7 @@ const GET_BOOKS = gql`
 function BookList() {
   const { loading, error, data } = useQuery(GET_BOOKS);
 
-  if (loading) return <div>Loading books...</div>;
+  if (loading) return <div>Loading Books...</div>;
   if (error) return <div>Error</div>;
 
   return (
