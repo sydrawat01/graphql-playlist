@@ -176,3 +176,322 @@ This will result:
 To check if the mutation to add books has been done to the `books` collection, we can check it on the [mongo cloud](https://cloud.mongodb.com).
 
 ![alt text](../assets/books-collection.png 'books collection updated with nutation')
+
+We'll add more books into the `books` collection from GraphQL.
+
+## Connect MongoDB Atlas to Robo-3T
+
+To connect your cluster from [MongoDB Atlas](https://cloud.mongodb.com), we need the connection string! This connection string will contain the address as well as the port to the MongoDB server.
+
+To find your connection string:
+
+- Click on 'Cluster0' or whatever name you've given to your cluster.
+- In the overview panel, we can see 3 clusters, of which two are secondary and one is primary. Click on the primary cluster.
+- We can see the cluster address as well as the port:
+  `cluster0-shard-00-02-pyagm.mongodb.net:27017`
+- Paste the address on the new connection window in the `address` text-box.
+- Next, move to the `authentication` tab, and select `Perform authentication`. Enter the `username` and `password` you had set when creating the cluster!.
+- Finally, move to the `SSL` tab, and select `Use SSL protocol`. Under `authentiation method`, select self-signed certificate`.
+
+Great! You're good to go!
+
+## Updating the `resolve()` functions
+
+Since we're using the cloud db now, we do not need the `resolve()` function reeturning data from the local arrays anymore. Let's change that:
+
+[schema.js]
+
+```js
+const BookType = new GraphQLObject({
+  //code
+  fields: () => {
+    //code
+    authorID: {
+      //code
+      resolve(parent, args){
+        return Author.findById(parent.authorID);
+      }
+    }
+  },
+});
+
+const AuthorType = new GraphQLObject({
+  //code
+  fields: () => {
+    //code
+    books: {
+      //code
+      resolve(parent, args){
+        return Book.find({authorID: parent.id});
+      }
+    }
+  },
+});
+
+//same in RootQuery as well. You get the idea.
+```
+
+Once we've done this, let's test it out!
+
+**Query 1**
+
+```graphql
+{
+  books {
+    name
+    genre
+  }
+}
+```
+
+```json
+{
+  "data": {
+    "books": [
+      {
+        "name": "The Long Earth",
+        "genre": "Sci-Fi"
+      },
+      {
+        "name": "The Color of Magic",
+        "genre": "Fantasy"
+      },
+      {
+        "name": "The Light Fantastic",
+        "genre": "Fantasy"
+      },
+      {
+        "name": "The Final Empire",
+        "genre": "Fantasy"
+      },
+      {
+        "name": "The Hero of Ages",
+        "genre": "Fantasy"
+      },
+      {
+        "name": "Name of the Wind",
+        "genre": "Fantasy"
+      }
+    ]
+  }
+}
+```
+
+**Query 2**
+
+```graphql
+{
+  books {
+    name
+    genre
+    authorID {
+      name
+      age
+    }
+  }
+}
+```
+
+```json
+{
+  "data": {
+    "books": [
+      {
+        "name": "The Long Earth",
+        "genre": "Sci-Fi",
+        "authorID": {
+          "name": "Terry Pratchett",
+          "age": 66
+        }
+      },
+      {
+        "name": "The Color of Magic",
+        "genre": "Fantasy",
+        "authorID": {
+          "name": "Terry Pratchett",
+          "age": 66
+        }
+      },
+      {
+        "name": "The Light Fantastic",
+        "genre": "Fantasy",
+        "authorID": {
+          "name": "Terry Pratchett",
+          "age": 66
+        }
+      },
+      {
+        "name": "The Final Empire",
+        "genre": "Fantasy",
+        "authorID": {
+          "name": "Brandon Sanderson",
+          "age": 42
+        }
+      },
+      {
+        "name": "The Hero of Ages",
+        "genre": "Fantasy",
+        "authorID": {
+          "name": "Brandon Sanderson",
+          "age": 42
+        }
+      },
+      {
+        "name": "Name of the Wind",
+        "genre": "Fantasy",
+        "authorID": {
+          "name": "Patrick Rothfuss",
+          "age": 44
+        }
+      }
+    ]
+  }
+}
+```
+
+**Query 3**
+
+```graphql
+{
+  authors {
+    name
+    age
+    books {
+      name
+      genre
+    }
+  }
+}
+```
+
+```json
+{
+  "data": {
+    "authors": [
+      {
+        "name": "Patrick Rothfuss",
+        "age": 44,
+        "books": [
+          {
+            "name": "Name of the Wind",
+            "genre": "Fantasy"
+          }
+        ]
+      },
+      {
+        "name": "Brandon Sanderson",
+        "age": 42,
+        "books": [
+          {
+            "name": "The Final Empire",
+            "genre": "Fantasy"
+          },
+          {
+            "name": "The Hero of Ages",
+            "genre": "Fantasy"
+          }
+        ]
+      },
+      {
+        "name": "Terry Pratchett",
+        "age": 66,
+        "books": [
+          {
+            "name": "The Long Earth",
+            "genre": "Sci-Fi"
+          },
+          {
+            "name": "The Color of Magic",
+            "genre": "Fantasy"
+          },
+          {
+            "name": "The Light Fantastic",
+            "genre": "Fantasy"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Query 4**
+
+```graphql
+{
+  book(id: "5eba83174522923178f91872") {
+    name
+    genre
+    authorID {
+      name
+      books {
+        name
+        genre
+      }
+    }
+  }
+}
+```
+
+```json
+{
+  "data": {
+    "book": {
+      "name": "The Color of Magic",
+      "genre": "Fantasy",
+      "authorID": {
+        "name": "Terry Pratchett",
+        "books": [
+          {
+            "name": "The Long Earth",
+            "genre": "Sci-Fi"
+          },
+          {
+            "name": "The Color of Magic",
+            "genre": "Fantasy"
+          },
+          {
+            "name": "The Light Fantastic",
+            "genre": "Fantasy"
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+**Query 5**
+
+```grahpql
+{
+  author(id:"5eba7f559d1ddb1356b79abf"){
+    name
+    age
+    books {
+      name
+    }
+  }
+}
+```
+
+```json
+{
+  "data": {
+    "author": {
+      "name": "Brandon Sanderson",
+      "age": 42,
+      "books": [
+        {
+          "name": "The Final Empire"
+        },
+        {
+          "name": "The Hero of Ages"
+        }
+      ]
+    }
+  }
+}
+```
+
+## GraphQL NonNull
