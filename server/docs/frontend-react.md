@@ -127,7 +127,7 @@ const GET_BOOKS = gql`
   {
     books {
       name
-      genre
+      id
     }
   }
 `;
@@ -168,3 +168,25 @@ app.use(cors());
 If we refresh the front-end endpoint [localhost:3000](http://localhost:3000), we can see that our data, i.e the result from our query has been logged successfully.
 
 ![alt text](../assets/query-log.png 'Log query result')
+
+## Rendering data in component
+
+We'll use the latest [`useQuery`](https://www.apollographql.com/docs/react/data/queries/#executing-a-query) function to execute our `gql` query as seen in the previous section. Now to render dynamic data:
+
+```js
+function BookList() {
+  const { loading, error, data } = useQuery(GEET_BOOKS);
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error</div>;
+
+  return (
+    <div>
+      <ul id="book-list">
+        {data.books.map(book => {
+          return <li key={book.id}>{book.name}</li>;
+        })}
+      </ul>
+    </div>
+  );
+}
+```
