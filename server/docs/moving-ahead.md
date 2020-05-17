@@ -1,4 +1,4 @@
-# Mongoose Models
+# Moving Ahead
 
 ## Create `author` and `book` models
 
@@ -495,3 +495,57 @@ Once we've done this, let's test it out!
 ```
 
 ## GraphQL NonNull
+
+Let's say we want to add a new author, with only the `name` propeerty, and not pass any `age` property like so:
+
+```graphql
+mutation {
+  addAuthor(name: "John") {
+    name
+  }
+}
+```
+
+This will ideally contain the `age` property. If we want to avoid doing this or vice-versa, like adding a new author with `age` property and no name, it's a big problem. Let's see how we avoid this.
+
+This is very simple. We'll use `GraphQLNonNull`, which says _"I will not accept null values for certain fields"_.
+
+We'll change a few minor things in the `Mutation` object:
+
+```js
+const Mutation = new GraphQLObjectType({
+  //code
+  fields: {
+    addAuthor: {
+      //code
+      args: {
+        name: { type: new GraphQLNonNull(GraphQLString) },
+        age: { type: new GraphQLNonNull(GraphQLInt) },
+      },
+    },
+    addBook: {
+      //code
+      args: {
+        name: { type: new GraphQLNonNull(GraphQLString) },
+        genre: { type: new GraphQLNonNull(GraphQLString) },
+        authorID: { type: new GraphQLNonNull(GraphQLID) },
+      },
+    },
+  },
+});
+```
+
+If we run a query like:
+
+```graphql
+mutation {
+  addAuthor(name: "Jason") {
+    name
+  }
+}
+```
+
+We'll get a squiggly line over `addAuthor` saying:
+`Field "addAuthor" argument "age" of type "Int!" is required, but it was not provided`
+
+This helps us in a huge way in avoiding bad data in our database.
