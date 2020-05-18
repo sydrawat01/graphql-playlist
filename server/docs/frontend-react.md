@@ -340,3 +340,53 @@ Finally, we should be able to see the resultant object on our console:
 ```json
 { "bookName": "The Road to Levinshire", "genre": "Sci-Fi", "authorID": "5eba7f419d1ddb1356b79abe" }
 ```
+
+## Queries with variables
+
+Let's create a query to add the book using the form details from the previous section.
+
+```js
+const ADD_BOOK = gql`
+  mutation($name: String!, $genre: String!, $authorID: ID!) {
+    addBook(name: $name, genre: $genre, authorID: $authorID) {
+      name
+      id
+    }
+  }
+`;
+```
+
+> NOTE: We do not use the initial `{}` braces in this query. For more details, [reference](https://github.com/apollographql/graphql-tag/issues/180#issuecomment-386540792).
+
+Now, we need to add the book data to our database on form submit. Let's see how we do that:
+
+```js
+import { useQuery, useMutation } from '@apollo/react-hooks';
+import { GET_AUTHORS, ADD_BOOK } from '../queries/queries';
+
+function AddBook() {
+  // previous code
+  const [addBook] = useMutation(ADD_BOOK);
+  // previous code
+  const submitForm = e => {
+    e.preventDefault();
+    addBook({
+      variables: {
+        name: formData.name,
+        genre: formData.genre,
+        authorID: formData.authorID,
+      },
+    });
+  };
+}
+```
+
+And we're done! On clicking the `+` button or hitting <kbd>Enter</kbd> on the form,our data is added to the database.
+
+We'll add a few things later to display the latest books on the frontend as well.
+
+![alt text](../assets/form.png 'form data that is saved to the db')
+
+If we refresh the frontend at [localhost:3000](http://localhost:3000), we can see that the data has been added to the books list.
+
+![alt text](../assets/books-list.png 'Latest addition is seen in the books list')
