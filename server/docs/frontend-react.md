@@ -412,3 +412,75 @@ const submitForm = e => {
 ```
 
 We use the `refetchQuery` option to refetch the query `GET_BOOKS` when the form is submitted on click of the `+` button, because of which, the component rendering data from this query gets updated!
+
+## Book details component
+
+When we click on a book, we want to show all the details related to that book to the user. So, when we click on a book, we need to query that single book from the GraphQL server, and display the data of that book onto the `BookDetail` component.
+
+First, we'll need to add the `onClick` event handler in `BookList` component. I have also refactored the code for a bit more clarity.
+
+```js
+import React, { useState } from 'react';
+function BookList() {
+  //previous code
+  const [selected, setSelected] = useState('');
+
+  const { books } = data;
+  const bookListItems = books.map(({ id, name }) => (
+    <li key={id} onClick={() => setSelected(id)}>
+      {name}
+    </li>
+  ));
+  return (
+    <div>
+      <ul id="book-list">{bookListItems}</ul>
+      <BookDetail bookID={selected} />
+    </div>
+  );
+}
+```
+
+Next, let's create the `BookDetail` component.
+
+```js
+import React, { useState } from 'react';
+import { useQuery } from '@apollo/react-hooks';
+import { GET_BOOK_DETAIL } from '../queries/queries';
+
+function BookDetail({ bookID }) {
+  const { loading, error, data } = useQuery(GET_BOOK_DETAIL, {
+    skip: !bookID,
+    variables: { id: bookID },
+  });
+  let content;
+  if (loading) content = <p>Loading...</p>;
+  else if (error) content = <p>Error</p>;
+  else if (!bookID) content = <p>No book selected</p>;
+  else {
+    const {
+      book: { name, genre, authorID },
+    } = data;
+    const books = authorID.books.map(({ id, name }) => {
+      return <li key={id}>{name}</li>;
+    });
+
+    content = (
+      <>
+        <h2>{name}</h2>
+        <p>{genre}</p>
+        <p>{authorID.name}</p>
+        <p>All books by this author:</p>
+        <ul className="other-books">{books}</ul>
+      </>
+    );
+  }
+
+  return <div id="book-details">{content}</div>;
+}
+
+export default BookDetail;
+```
+
+And there we have it! All the functionalities are working just fine!
+
+![alt text](../assets/book-deets.png 'Display book details on cliking a particular book')
