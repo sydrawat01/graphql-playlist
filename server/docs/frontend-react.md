@@ -390,3 +390,25 @@ We'll add a few things later to display the latest books on the frontend as well
 If we refresh the frontend at [localhost:3000](http://localhost:3000), we can see that the data has been added to the books list.
 
 ![alt text](../assets/books-list.png 'Latest addition is seen in the books list')
+
+## Refetching queries
+
+We can also refetch queries to update the data in our components! So let's update the list of books when we submit the form with book data.
+
+```js
+import { GET_AUTHORS, ADD_BOOK, GET_BOOKS } from '../queries/queries';
+// previous code
+const submitForm = e => {
+  e.preventDefault();
+  addBook({
+    variables: {
+      name: formData.bookName,
+      genre: formData.genre,
+      authorID: formData.authorID,
+    },
+    refetchQueries: [{ query: GET_BOOKS }],
+  });
+};
+```
+
+We use the `refetchQuery` option to refetch the query `GET_BOOKS` when the form is submitted on click of the `+` button, because of which, the component rendering data from this query gets updated!

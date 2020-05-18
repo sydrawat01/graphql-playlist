@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/react-hooks';
-import { GET_AUTHORS, ADD_BOOK } from '../queries/queries';
+import { GET_AUTHORS, ADD_BOOK, GET_BOOKS } from '../queries/queries';
 
 function AddBook() {
   const [formData, setFormData] = useState({
@@ -30,6 +30,7 @@ function AddBook() {
         genre: formData.genre,
         authorID: formData.authorID,
       },
+      refetchQueries: [{ query: GET_BOOKS }],
     });
   };
 
