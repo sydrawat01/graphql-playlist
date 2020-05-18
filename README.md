@@ -10,7 +10,7 @@ For the basics, refer [this README.md](./server/README.md).
 
 For detailed study, refer [this directory](./server/docs/).
 
-This project is intended to understand GraphQL and how to connect it with React using Apollo Client for React. More details on the same are [here](./server/docs/frontend-react.md)
+This project is intended to understand GraphQL and how to connect it with React using Apollo Client for React. More details on the same are [here](./server/docs/frontend-react.md).
 
 ## Development
 
@@ -29,6 +29,8 @@ Check [localhost:4000/graphql](http://localhost:4000/graphql).
 `npm start`
 
 Check [localhost:3000](http://localhost:3000).
+
+![alt text](./server/assets/app.png 'Final Render')
 
 ## Contributing
 
