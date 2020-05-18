@@ -484,3 +484,9 @@ export default BookDetail;
 And there we have it! All the functionalities are working just fine!
 
 ![alt text](../assets/book-deets.png 'Display book details on cliking a particular book')
+
+## Styling the app
+
+Add the appropriate styles to the component in `index.css`. YUS! We're officially done! We've come a long way, and this is how our app currently looks like:
+
+![alt text](../assets/app.png 'Final App')
